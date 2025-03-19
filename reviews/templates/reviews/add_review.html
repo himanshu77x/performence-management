@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Add Review</title>
+  <style>
+    body {
+      background-color: #f4f7f8;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      background-color: #fff;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #555;
+    }
+    .form-control {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    .form-control:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+    textarea.form-control {
+      resize: vertical;
+    }
+    .btn-primary {
+      background-color: #007bff;
+      color: #fff;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Add Review</h2>
+
+  <form method="POST">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="title">Review Title:</label>
+      <input type="text" name="title" id="title" class="form-control" required>
+    </div>
+
+    <div class="form-group">
+      <label for="employee">Select Employee:</label>
+      <select name="employee" id="employee" class="form-control" required>
+        <option value="">Select Employee</option>
+        {% for emp in employees %}
+          <option value="{{ emp.id }}">{{ emp.username }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="review_date">Review Date:</label>
+      <input type="date" name="review_date" id="review_date" class="form-control" required>
+    </div>
+
+    <div class="form-group">
+      <label for="review_period">Review Period:</label>
+      <select name="review_period" id="review_period" class="form-control" required>
+        <option value="">Select Period</option>
+        <option value="Monthly">Monthly</option>
+        <option value="Quarterly">Quarterly</option>
+        <option value="Annual">Annual</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="rating">Enter Rating (1-10):</label>
+      <input type="number" name="rating" id="rating" min="1" max="10" class="form-control" required>
+    </div>
+
+    <div class="form-group">
+      <label for="comment">Review Comment:</label>
+      <textarea name="comment" id="comment" class="form-control" rows="3"></textarea>
+    </div>
+
+    <button type="submit" class="btn-primary">Add Review</button>
+  </form>
+</div>
+
+</body>
+</html>

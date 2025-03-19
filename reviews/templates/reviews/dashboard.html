@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Review Dashboard</title>
+  <style>
+    body {
+      background-color: #f4f6f8;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    h2, h4 {
+      color: #2c3e50;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 4px 2px;
+      font-size: 14px;
+    }
+
+    .btn-primary { background-color: #007bff; color: #fff; }
+    .btn-success { background-color: #28a745; color: #fff; }
+    .btn-warning { background-color: #ffc107; color: #000; }
+    .btn-danger { background-color: #dc3545; color: #fff; }
+    .btn-info { background-color: #17a2b8; color: #fff; }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .table th, .table td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+
+    .table thead {
+      background-color: #343a40;
+      color: white;
+    }
+
+    .form-select, .form-control {
+      padding: 8px;
+      margin: 4px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .pagination {
+      display: flex;
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+
+    .pagination li {
+      margin: 0 4px;
+    }
+
+    .pagination a {
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      color: #007bff;
+      border: 1px solid #ddd;
+    }
+
+    .pagination .active a {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+    }
+
+    .filters, .stats {
+      margin-top: 30px;
+    }
+
+    .filters label, .stats label {
+      display: block;
+      margin-top: 10px;
+      font-weight: 500;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 400px;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .close-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      float: right;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>Review Dashboard</h2>
+
+  <div>
+    <a href="{% url 'add_review' %}" class="btn btn-primary">Add Review</a>
+
+    <select id="departmentFilter" class="form-select d-inline" style="width: 200px;">
+      <option value="">Select Department</option>
+      {% for dept in departments %}
+        <option value="{{ dept.id }}">{{ dept.name }}</option>
+      {% endfor %}
+    </select>
+
+    <input type="text" id="searchEmployee" placeholder="Search Employee" class="form-control d-inline" style="width: 200px;">
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Sr. No</th>
+        <th>Employee Name</th>
+        <th>Review Title</th>
+        <th>Review Date</th>
+        <th>Review Period</th>
+        <th>Rating</th>
+        <th>See Comments</th>
+        <th>Edit</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for review in reviews %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ review.employee.username }}</td>
+        <td>{{ review.title }}</td>
+        <td>{{ review.review_date }}</td>
+        <td>{{ review.review_period }}</td>
+        <td>{{ review.rating }}</td>
+        <td><button class="btn btn-info btn-sm" onclick="openModal('modal{{ review.id }}')">View</button></td>
+        <td><a href="{% url 'edit_review' review.id %}" class="btn btn-warning btn-sm">Edit</a></td>
+        <td><a href="{% url 'delete_review' review.id %}" class="btn btn-danger btn-sm">Delete</a></td>
+      </tr>
+
+      <div id="modal{{ review.id }}" class="modal">
+        <div class="modal-content">
+          <button class="close-btn" onclick="closeModal('modal{{ review.id }}')">X</button>
+          <h4>Review Comment</h4>
+          <p>{{ review.comment }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Pagination -->
+  <ul class="pagination">
+    {% if reviews.has_previous %}
+      <li><a href="?page={{ reviews.previous_page_number }}">Previous</a></li>
+    {% endif %}
+    {% for num in reviews.paginator.page_range %}
+      <li class="{% if reviews.number == num %}active{% endif %}"><a href="?page={{ num }}">{{ num }}</a></li>
+    {% endfor %}
+    {% if reviews.has_next %}
+      <li><a href="?page={{ reviews.next_page_number }}">Next</a></li>
+    {% endif %}
+  </ul>
+
+  <!-- Filters -->
+  <div class="filters">
+    <h4>Filters</h4>
+    <form method="GET">
+      <label>Filter By Employee:</label>
+      <select name="employee" class="form-select">
+        <option value="">Select Employee</option>
+        {% for emp in employees %}
+          <option value="{{ emp.id }}">{{ emp.username }}</option>
+        {% endfor %}
+      </select>
+
+      <label>Filter By Period:</label>
+      <select name="period" class="form-select">
+        <option value="">Select Period</option>
+        <option value="Monthly">Monthly</option>
+        <option value="Quarterly">Quarterly</option>
+        <option value="Annual">Annual</option>
+      </select>
+
+      <label>Filter Date Range:</label>
+      <input type="date" name="from_date" class="form-control">
+      <input type="date" name="to_date" class="form-control">
+
+      <label>Filter by Rating:</label>
+      <input type="radio" name="rating_range" value="1-5"> 1-5
+      <input type="radio" name="rating_range" value="6-8"> 6-8
+      <input type="radio" name="rating_range" value="9-10"> 9-10
+
+      <br><br>
+      <button type="submit" class="btn btn-success">Apply Filter</button>
+    </form>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <h4>Statistics</h4>
+    <table class="table" style="width: 50%;">
+      <thead>
+        <tr>
+          <th>Period</th>
+          <th>Number of Reviews</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Monthly</td><td>{{ stats.monthly }}</td></tr>
+        <tr><td>Quarterly</td><td>{{ stats.quarterly }}</td></tr>
+        <tr><td>Annual</td><td>{{ stats.annual }}</td></tr>
+      </tbody>
+    </table>
+
+    <table class="table" style="width: 50%;">
+      <thead>
+        <tr>
+          <th>Rating Range</th>
+          <th>Total Employees</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1-5</td><td>{{ stats.rating_1_5 }}</td></tr>
+        <tr><td>6-8</td><td>{{ stats.rating_6_8 }}</td></tr>
+        <tr><td>9-10</td><td>{{ stats.rating_9_10 }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  function openModal(id) {
+    document.getElementById(id).classList.add('active');
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+  }
+</script>
+
+</body>
+</html>
