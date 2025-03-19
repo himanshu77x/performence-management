@@ -42,6 +42,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -69,17 +70,24 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'review_management.wsgi.application'
-
+import os
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+
+import dj_database_url
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'default': dj_database_url.config(default='sqlite:///db.sqlite3')
+
     }
 }
+
+ALLOWED_HOSTS = ['*']  # Or better, use Render-provided domain
+DEBUG = False
 
 
 # Password validation
@@ -122,3 +130,18 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+ #Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'
+
+# Production (Render) specific:
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Extra settings:
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+import dj_database_url
+import environ
+import os
+
+env = environ.Env()
+environ.Env.read_env()
