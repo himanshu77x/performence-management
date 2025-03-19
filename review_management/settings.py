@@ -145,3 +145,4 @@ import os
 
 env = environ.Env()
 environ.Env.read_env()
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
